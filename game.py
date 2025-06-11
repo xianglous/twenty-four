@@ -1,13 +1,5 @@
-from typing import Collection, List
+from typing import Callable, Collection, Dict, List, Literal
 
-
-
-OP_FUNCS = {
-    "+": lambda game, i1, i2: game.add(i1, i2),
-    "-": lambda game, i1, i2: game.subtract(i1, i2),
-    "*": lambda game, i1, i2: game.multiply(i1, i2),
-    "/": lambda game, i1, i2: game.divide(i1, i2)
-}
 
 
 def _remove(arr: List[float], idx: int):
@@ -24,8 +16,8 @@ class Game:
     Game class represents a 24 game.
     It contains the interface to perform operations and undo them.
     """
-    TARGET = 24.0
-    EPSILON = 1e-9
+    target = 24.0
+    epsilon = 1e-9
 
     def __init__(self, nums: Collection[int]):
         if len(nums) != 4:
@@ -92,7 +84,7 @@ class Game:
             return False
         val1 = self.cur_state[idx1]
         val2 = self.cur_state[idx2]
-        if abs(val2) < self.EPSILON:
+        if abs(val2) < self.epsilon:
             return False  # Division by zero
         result = val1 / val2
         return self._perform_op(idx1, idx2, "/", result)
@@ -108,7 +100,7 @@ class Game:
     def is_solved(self) -> bool:
         """Check if the game is solved (one number remaining that equals target)"""
         if len(self.cur_state) == 1:
-            return abs(self.cur_state[0] - self.TARGET) < self.EPSILON
+            return abs(self.cur_state[0] - self.target) < self.epsilon
         return False
     
     def get_cur_state(self) -> List[float]:
@@ -148,3 +140,11 @@ class Game:
             exprs.append(f"{expr1} {op} {expr2}")
             expr_ops.append(op)
         return " ".join(exprs)
+
+
+OP_FUNCS: Dict[Literal["+", "-", "*", "/"], Callable[[Game, int, int], bool]] = {
+    "+": lambda game, i1, i2: game.add(i1, i2),
+    "-": lambda game, i1, i2: game.subtract(i1, i2),
+    "*": lambda game, i1, i2: game.multiply(i1, i2),
+    "/": lambda game, i1, i2: game.divide(i1, i2)
+}
